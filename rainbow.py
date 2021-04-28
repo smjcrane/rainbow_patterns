@@ -1,5 +1,6 @@
 import drawSvg as draw
 from math import sqrt
+import sys
 
 size = 10
 
@@ -22,11 +23,15 @@ class Point:
     def __str__(self):
         return "Point("+str(self.x)+", "+str(self.y)+","+str(self.z)+")"
 
+    def __repr__(self):
+        return self.__str__()
+
 
 class RainbowSwirler:
     rainbow = ['#d63333', '#eda334', '#2abf43', '#52b5f7', '#5d32c2', '#d93dc1']
 
     def __init__(self):
+        self.filename="rainbow.txt"
         self.d = draw.Drawing(250, 250, origin='center', displayInline=False)
         self.d.append(draw.Rectangle(-250,-250,500,500, fill='#000000'))
 
@@ -45,11 +50,23 @@ class RainbowSwirler:
         for p in [[3,-2,-1],[3,-1,-2],[3,0,-3],[3,1,-4],[3,2,-5],[4,1,-5],[5,0,-5],[6,-1,-5],[7,-2,-5],[6,-2,-4],[5,-2,-3],[4,-2,-2],[13/3,-2/3,-11/3]]:
             self.doInARainbow(Point(*p), lambda v, c: r.drawOneCircle(v, c, 6))
 
+    def draw_from_file(self, filename):
+        self.filename = filename
+        with open(filename) as file:
+            points = [Point(*[int(x) for x in line.split(",")]) for line in file.readlines()]
+        for p in points:
+            self.doInARainbow(p, lambda v, c: r.drawOneCircle(v, c, 6))
+
+
     def save(self):
         self.d.setPixelScale(2)  # Set number of pixels per geometry unit
-        self.d.saveSvg('rainbow.svg')
-        self.d.savePng('rainbow.png')
+        print("Saving to", self.filename.replace(".txt", ".png"))
+        self.d.saveSvg(self.filename.replace(".txt", ".svg"))
+        self.d.savePng(self.filename.replace(".txt", ".png"))
 
-r = RainbowSwirler()
-r.trianglesOfCircles()
-r.save()
+
+if __name__=="__main__":
+    r = RainbowSwirler()
+    r.draw_from_file(sys.argv[1])
+    r.save()
+
